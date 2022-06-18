@@ -18,3 +18,4 @@ Run:
 ```sh
 pip install "git+git://github.com/Pranprest/Rerun.git"
 ```
+- Depends on Python 3.8+
