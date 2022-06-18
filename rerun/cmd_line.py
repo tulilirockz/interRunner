@@ -2,12 +2,12 @@ import subprocess
 import sys
 import logging
 from cmd import Cmd
-from typing import Optional, Union, Final
+from typing import Optional, Union, Final, Dict, List
 
 
 class Commands(Cmd):
     def setVerbosity(self, verbosity: Union[str, int] = 0):
-        LEVELS: Final[dict[str, int]] = {
+        LEVELS: Final[Dict[str, int]] = {
             'NOTSET': 0, 'DEBUG': 10,
             'INFO': 20, 'WARNING': 30,
             'ERROR': 40, 'CRITICAL': 50
@@ -28,12 +28,12 @@ class Commands(Cmd):
         logging.info(f"Logging level set to {self._verbosity}")
         return self
 
-    def setArgv(self, argv: list[str]):
+    def setArgv(self, argv: List[str]) -> "Commands":
         self._arg_stack = argv
         logging.debug(f"Set arguments: {argv}")
         return self
 
-    def setLogOnly(self, FLAG: bool):
+    def setLogOnly(self, FLAG: bool) -> "Commands":
         self._log_only = FLAG
         logging.debug(f"Set log only: {self._log_only}")
         return self
@@ -42,31 +42,31 @@ class Commands(Cmd):
         self.prompt = "[ " + " ".join(self._arg_stack) + " ]" + " >>> "
         return super().postcmd(stop, line)
 
-    def default(self, line: str) -> None:
+    def default(self, line: str) -> bool:
         if self._verbosity <= 20:
             print(f"*** Unknown syntax: {line}", file=sys.stderr)
-        fullstk: list[str] = []
+        fullstk: List[str] = []
         fullstk.extend(self._arg_stack)
         fullstk.extend(line.split(" "))
         if not self._log_only:
             subprocess.run(fullstk)
-        return None
+        return True
 
     @staticmethod
-    def do_EOF(arg: Optional[str]) -> int:
+    def do_EOF(arg: Optional[str]) -> None:
         "Exits the program"
         if arg and arg == "":
             arg = None
         raise SystemExit(arg)
 
     @staticmethod
-    def do_exit(arg: Optional[str]) -> int:
+    def do_exit(arg: Optional[str]) -> None:
         "Exits the program"
         if arg and arg == " ":
             arg = None
         raise SystemExit(arg)
 
-    def do_help(self, arg: str) -> bool | None:
+    def do_help(self, arg: str) -> Optional[bool]:
         """Shows this help"""
         return super().do_help(arg)
 
@@ -74,7 +74,7 @@ class Commands(Cmd):
         """Pushes the first argument to the argument stack"""
         self._arg_stack.extend(arg.split(" "))
 
-    def do_pop(self, arg: Union[str, int]) -> int | None:
+    def do_pop(self, arg: Union[str, int]) -> Optional[int]:
         """Pops the first argument from the argument stack"""
         times: int = 1
         try:
@@ -89,6 +89,6 @@ class Commands(Cmd):
         return None
 
     logging.basicConfig(format="", stream=sys.stderr)
-    _arg_stack: list[str] = []
+    _arg_stack: List[str] = []
     _verbosity: int = 0
     _log_only: bool = False

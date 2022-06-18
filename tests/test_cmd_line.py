@@ -1,5 +1,5 @@
 from rerun.cmd_line import Commands
-from typing import Union
+from typing import Union, List
 import pytest
 
 
@@ -42,7 +42,7 @@ def test_cmderr(capsys, test_input, expected):
     (["echo", 'hello', 'world'], '1', ['echo', 'hello']),
     (["echo", 'hello', 'world'], '3', []),
 ])
-def test_cmdpop(test_stack: list[str], times: Union[str, int], expected_stack: list[str]) -> None:
+def test_cmdpop(test_stack: List[str], times: Union[str, int], expected_stack: List[str]) -> None:
     c = Commands()
     c.setArgv(test_stack)
     c.do_pop(times)
@@ -62,7 +62,7 @@ def test_cmdpop_except(capsys) -> None:
     (['echo'], 'hiihhi hi hi hi', ['echo', 'hiihhi', 'hi', 'hi', 'hi']),
 ]
 )
-def test_cmdpush(test_stack: list[str], additional_str: str, expected_stack: list[str]) -> None:
+def test_cmdpush(test_stack: List[str], additional_str: str, expected_stack: List[str]) -> None:
     c = Commands()
     c.setArgv(test_stack)
     c.do_push(additional_str)
