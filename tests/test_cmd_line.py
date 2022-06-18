@@ -1,6 +1,25 @@
 from rerun.cmd_line import Commands
-from typing import Callable, TypeVar, Union
+from typing import Union
 import pytest
+
+
+@pytest.mark.parametrize("test_input,expected", [
+    ("CRITICAL", 50),
+    ("ERROR", 40),
+    ("WARNING", 30),
+    ("INFO", 20),
+    ("DEBUG", 10),
+    ("NOTSET", 0),
+    ("amongus", 100),
+    ("", 100),
+    (10, 10),
+    (20, 20),
+    (3, 3),
+])
+def test_verbosity(test_input, expected):
+    c = Commands()
+    c.setVerbosity(test_input)
+    assert c._verbosity == expected
 
 
 @pytest.mark.parametrize("test_input,expected", [
@@ -10,8 +29,11 @@ import pytest
 ])
 def test_cmderr(capsys, test_input, expected):
     c = Commands()
+    c.setVerbosity("DEBUG")
+    c.setLogOnly(True)
     c.onecmd(test_input)
-    err = capsys.readouterr()[1]
+    out, err = capsys.readouterr()
+    assert out == ""
     assert err == expected
 
 
