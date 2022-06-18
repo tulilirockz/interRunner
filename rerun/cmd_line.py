@@ -43,7 +43,7 @@ class Commands(Cmd):
         return super().postcmd(stop, line)
 
     def default(self, line: str) -> None:
-        if self._verbosity >= 10:
+        if self._verbosity <= 20:
             print(f"*** Unknown syntax: {line}", file=sys.stderr)
         fullstk: list[str] = []
         fullstk.extend(self._arg_stack)
