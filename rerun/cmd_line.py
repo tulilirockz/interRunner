@@ -6,7 +6,7 @@ from typing import Optional, Union, Final, Dict, List
 
 
 class Commands(Cmd):
-    def setVerbosity(self, verbosity: Union[str, int] = 0):
+    def setVerbosity(self, verbosity: Union[str, int] = 100):
         LEVELS: Final[Dict[str, int]] = {
             'NOTSET': 0, 'DEBUG': 10,
             'INFO': 20, 'WARNING': 30,
@@ -42,28 +42,27 @@ class Commands(Cmd):
         self.prompt = "[ " + " ".join(self._arg_stack) + " ]" + " >>> "
         return super().postcmd(stop, line)
 
-    def default(self, line: str) -> bool:
-        if self._verbosity <= 20:
-            print(f"*** Unknown syntax: {line}", file=sys.stderr)
+    def default(self, line: str) -> None:
         fullstk: List[str] = []
         fullstk.extend(self._arg_stack)
         fullstk.extend(line.split(" "))
         if not self._log_only:
-            subprocess.run(fullstk)
-        return True
+            try:
+                subprocess.run(fullstk)
+            except FileNotFoundError:
+                if self._verbosity <= 50:
+                    print(f"{line} is not a valid command", file=sys.stderr)
+                else:
+                    logging.critical(f"{line} is not a valid command")
 
-    @staticmethod
-    def do_EOF(arg: Optional[str]) -> None:
+    def do_EOF(self, arg: Optional[str]) -> None:
         "Exits the program"
-        if arg and arg == "":
-            arg = None
-        raise SystemExit(arg)
+        return self.do_exit(arg)
 
     @staticmethod
     def do_exit(arg: Optional[str]) -> None:
         "Exits the program"
-        if arg and arg == " ":
-            arg = None
+        arg = None
         raise SystemExit(arg)
 
     def do_help(self, arg: str) -> Optional[bool]:

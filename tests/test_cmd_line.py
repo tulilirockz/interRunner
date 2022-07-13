@@ -1,4 +1,3 @@
-from rerun.cmd_line import Commands
 from typing import Union, List
 import pytest
 
@@ -16,77 +15,71 @@ import pytest
     (20, 20),
     (3, 3),
 ])
-def test_verbosity(test_input, expected):
-    c = Commands()
-    c.setVerbosity(test_input)
-    assert c._verbosity == expected
+def test_verbosity(cmd_instance, test_input, expected):
+    cmd_instance.setVerbosity(test_input)
+    assert cmd_instance._verbosity == expected
 
 
 @pytest.mark.parametrize("test_input,expected", [
-    ('amongus', '*** Unknown syntax: amongus\n'),
-    ('aaaaaaaaaa', '*** Unknown syntax: aaaaaaaaaa\n'),
-    ('', ''),
+    ('amongus', 'amongus is not a valid command\n'),
+    ('aaaaaaaaaa', 'aaaaaaaaaa is not a valid command\n'),
+    ('', 'aaaaaaaaaa is not a valid command\n'),
 ])
-def test_cmderr(capsys, test_input, expected):
-    c = Commands()
-    c.setVerbosity("DEBUG")
-    c.setLogOnly(True)
-    c.onecmd(test_input)
+def test_cmderr(capsys, cmd_instance, test_input, expected):
+    cmd_instance.setVerbosity("NOTSET").setLogOnly(False) \
+        .onecmd(test_input)
     out, err = capsys.readouterr()
     assert out == ""
     assert err == expected
 
 
-@pytest.mark.parametrize("test_stack,times,expected_stack", [
+@ pytest.mark.parametrize("test_stack,times,expected_stack", [
     (["echo"], 1, []),
     (["echo", 'hello', 'world'], '1', ['echo', 'hello']),
     (["echo", 'hello', 'world'], '3', []),
 ])
-def test_cmdpop(test_stack: List[str], times: Union[str, int], expected_stack: List[str]) -> None:
-    c = Commands()
-    c.setArgv(test_stack)
-    c.do_pop(times)
-    assert c._arg_stack == expected_stack
+def test_cmdpop(cmd_instance, test_stack: List[str], times: Union[str, int], expected_stack: List[str]) -> None:
+    cmd_instance.setArgv(test_stack) \
+        .do_pop(times)
+    assert cmd_instance._arg_stack == expected_stack
 
 
-def test_cmdpop_except(capsys) -> None:
-    c = Commands()
-    c.setArgv(["echo", "hello", "world"])
-    c.do_pop("hi")
+def test_cmdpop_except(capsys, cmd_instance) -> None:
+    cmd_instance.setArgv(["echo", "hello", "world"]) \
+        .do_pop("hi")
     assert capsys.readouterr()[1] == "hi could not be interpreted as a number\n"
 
 
-@pytest.mark.parametrize("test_stack, additional_str, expected_stack", [
+@ pytest.mark.parametrize("test_stack, additional_str, expected_stack", [
     (['echo hello'], 'world', ['echo hello', 'world']),
     (['echo'], 'hello world', ['echo', 'hello', 'world']),
     (['echo'], 'hiihhi hi hi hi', ['echo', 'hiihhi', 'hi', 'hi', 'hi']),
 ]
 )
-def test_cmdpush(test_stack: List[str], additional_str: str, expected_stack: List[str]) -> None:
-    c = Commands()
-    c.setArgv(test_stack)
-    c.do_push(additional_str)
-    assert c._arg_stack == expected_stack
+def test_cmdpush(cmd_instance, test_stack: List[str], additional_str: str, expected_stack: List[str]) -> None:
+    cmd_instance.setArgv(test_stack) \
+        .do_push(additional_str)
+    assert cmd_instance._arg_stack == expected_stack
 
 
-def test_prompt() -> None:
-    c = Commands()
-    c.setArgv(["echo", "hello", "world"])
-    c.prompt = "[ " + " ".join(["echo", "hello", 'world']) + " ]" + " >>> "
-    c.onecmd("pop 2")
-    c.postcmd(False, '')
-    assert c.prompt == "[ echo ] >>> "
-    c.onecmd("push hihi hi")
-    c.postcmd(False, '')
-    assert c.prompt == "[ echo hihi hi ] >>> "
-    c.onecmd("pop")
-    c.postcmd(False, '')
-    assert c.prompt == "[ echo hihi ] >>> "
+def test_prompt(cmd_instance) -> None:
+    cmd_instance.setLogOnly(True)
+    cmd_instance.setArgv(["echo", "hello", "world"])
+    cmd_instance.prompt = "[ " + " ".join(["echo", "hello", 'world']) + " ]" + " >>> "
+    cmd_instance.onecmd("pop 2")
+    cmd_instance.postcmd(False, '')
+    assert cmd_instance.prompt == "[ echo ] >>> "
+    cmd_instance.onecmd("push hihi hi")
+    cmd_instance.postcmd(False, '')
+    assert cmd_instance.prompt == "[ echo hihi hi ] >>> "
+    cmd_instance.onecmd("pop")
+    cmd_instance.postcmd(False, '')
+    assert cmd_instance.prompt == "[ echo hihi ] >>> "
 
 
-def test_exit() -> None:
+def test_exit(cmd_instance) -> None:
     with pytest.raises(SystemExit):
-        Commands().do_exit("")
+        cmd_instance.do_exit("")
 
     with pytest.raises(SystemExit):
-        Commands().do_EOF("")
+        cmd_instance.do_EOF("")
