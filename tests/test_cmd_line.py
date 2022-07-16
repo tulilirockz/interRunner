@@ -28,12 +28,10 @@ def test_verbosity(cmd_instance, test_input, expected):
 def test_cmderr(capsys, cmd_instance, test_input, expected):
     cmd_instance.setVerbosity("NOTSET").setLogOnly(False) \
         .onecmd(test_input)
-    out, err = capsys.readouterr()
-    assert out == ""
-    assert err == expected
+    assert capsys.readouterr()[1] == expected
 
 
-@ pytest.mark.parametrize("test_stack,times,expected_stack", [
+@pytest.mark.parametrize("test_stack,times,expected_stack", [
     (["echo"], 1, []),
     (["echo", 'hello', 'world'], '1', ['echo', 'hello']),
     (["echo", 'hello', 'world'], '3', []),
@@ -44,13 +42,7 @@ def test_cmdpop(cmd_instance, test_stack: List[str], times: Union[str, int], exp
     assert cmd_instance._arg_stack == expected_stack
 
 
-def test_cmdpop_except(capsys, cmd_instance) -> None:
-    cmd_instance.setArgv(["echo", "hello", "world"]) \
-        .do_pop("hi")
-    assert capsys.readouterr()[1] == "hi could not be interpreted as a number\n"
-
-
-@ pytest.mark.parametrize("test_stack, additional_str, expected_stack", [
+@pytest.mark.parametrize("test_stack, additional_str, expected_stack", [
     (['echo hello'], 'world', ['echo hello', 'world']),
     (['echo'], 'hello world', ['echo', 'hello', 'world']),
     (['echo'], 'hiihhi hi hi hi', ['echo', 'hiihhi', 'hi', 'hi', 'hi']),
@@ -79,7 +71,7 @@ def test_prompt(cmd_instance) -> None:
 
 def test_exit(cmd_instance) -> None:
     with pytest.raises(SystemExit):
-        cmd_instance.do_exit("")
+        cmd_instance.do_exit()
 
     with pytest.raises(SystemExit):
-        cmd_instance.do_EOF("")
+        cmd_instance.do_EOF()
