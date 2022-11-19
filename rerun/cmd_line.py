@@ -17,10 +17,7 @@ class Commands(Cmd):
         with contextlib.suppress(ValueError):
             verbosity = int(verbosity)
 
-        if type(verbosity) is str:
-            self._verbosity = LEVELS.get(verbosity, 100)
-        elif type(verbosity) is int:
-            self._verbosity = verbosity
+        self._verbosity = verbosity if type(verbosity) is int else LEVELS.get(verbosity, 100)
 
         logging.getLogger().setLevel(self._verbosity)
         logging.info(f"Logging level set to {self._verbosity}")
