@@ -16,6 +16,7 @@ Then, it'll look something like this:
 ## Installation
 Run:
 ```sh
-pip install "git+git://github.com/Pranprest/Rerun.git"
+git clone "git://gitlab.com/tuliliblossom/Rerun.git"
+poetry install ./Rerun/
 ```
 - Depends on Python 3.8+

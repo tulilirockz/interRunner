@@ -1,9 +1,9 @@
 [tool.poetry]
 name = "rerun"
 version = "1.0.0"
-description = "utility for running cli apps interactively"
-authors = ["Pranprest <79233261+Pranprest@users.noreply.github.com>"]
-license = "MIT"
+description = "An utility for running cli apps interactively"
+authors = ["Tulili Blossom <tulilirockz.pub@gmail.com>"]
+license = "BSD 2-Clause"
 
 [tool.poetry.dependencies]
 python = "^3.8"
