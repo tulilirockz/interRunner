@@ -43,3 +43,17 @@ warn_return_any = true
 warn_unreachable = true
 warn_unused_configs = true
 no_implicit_reexport = true
+
+[tool.tox]
+legacy_tox_ini = """
+    [tox]
+    isolated_build = True
+    envlist = py310, py311
+
+    [testenv]
+    platform = linux
+    whitelist_externals = poetry
+    commands =
+        poetry install -v
+        poetry run pytest
+"""
